@@ -10,6 +10,7 @@ import {
 import { useDebouncedCallback } from "use-debounce";
 
 import { fetchNotes } from "@/lib/api";
+import type { NoteTag } from "@/types/note";
 
 import NoteList from "@/components/NoteList/NoteList";
 import Modal from "@/components/Modal/Modal";
@@ -17,11 +18,15 @@ import NoteForm from "@/components/NoteForm/NoteForm";
 import Pagination from "@/components/Pagination/Pagination";
 import SearchBox from "@/components/SearchBox/SearchBox";
 
-import css from "../../components/NotePage/NotePage.module.css";
+import css from "@/components/NotePage/NotePage.module.css";
 
 const PER_PAGE = 12;
 
-export default function App() {
+interface NotesClientProps {
+  tag?: NoteTag;
+}
+
+export default function NotesClient({ tag }: NotesClientProps) {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -41,12 +46,13 @@ export default function App() {
     error,
     isPlaceholderData,
   } = useQuery({
-    queryKey: ["notes", page, search],
+    queryKey: ["notes", page, search, tag ?? ""],
     queryFn: () =>
       fetchNotes({
         page,
         perPage: PER_PAGE,
         search,
+        tag,
       }),
     placeholderData: keepPreviousData,
   });
@@ -74,9 +80,7 @@ export default function App() {
       </header>
 
       {isPending && (
-        <p className={css.message}>
-          Loading notes...
-        </p>
+        <p className={css.message}>Loading notes...</p>
       )}
 
       {isError && (
@@ -86,9 +90,7 @@ export default function App() {
       )}
 
       {isPlaceholderData && (
-        <p className={css.message}>
-          Loading notes...
-        </p>
+        <p className={css.message}>Loading notes...</p>
       )}
 
       {!isPending &&
